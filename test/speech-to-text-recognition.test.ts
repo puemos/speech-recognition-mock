@@ -1,186 +1,113 @@
-import SpeechToTextRecognition, {
-  IRecognition,
-  IWindow
-} from '../src/speech-recognition-mock'
+import { SpeechRecognitionMock } from '../src/speech-recognition-mock'
 import {
-  SpeechRecognitionStaticMock,
-  SpeechRecognitionMock
-} from './__mocks__/webkitSpeechRecognition'
-import { oneSentence } from './__mocks__/reslutsLists'
+  oneSentence,
+  speechRecognitionResultFn,
+  speechRecognitionAlternativeFn
+} from '../src/utils'
 
-let recognition: SpeechToTextRecognition
 let speechRecognition: SpeechRecognitionMock
-let onEndCallback = jest.fn()
-let onChangeCallback = jest.fn()
-let onStopCallback = jest.fn()
+let onEndSpy = jest.fn()
+let onStartSpy = jest.fn()
+let onResultSpy = jest.fn()
+let onCustomSpy = jest.fn()
 
-describe('Recognition', () => {
+describe('oneSentence', () => {
+  it('should mock a voice results', () => {
+    const results = oneSentence('wow super mock')
+    expect(results[0][0].transcript).toEqual('wow super mock')
+    expect(results[0].isFinal).toBeFalsy()
+  })
+
+  it('should mock a final results', () => {
+    const results = oneSentence('wow super mock', true)
+    expect(results[0][0].transcript).toEqual('wow super mock')
+    expect(results[0].isFinal).toBeTruthy()
+  })
+  it('should speechRecognitionAlternativeFn', () => {
+    const item = speechRecognitionResultFn(1)
+    expect(item).toEqual({
+      isFinal: false,
+      item: speechRecognitionAlternativeFn,
+      length: 0
+    })
+  })
+  it('should speechRecognitionResultFn', () => {
+    const item = speechRecognitionAlternativeFn(1)
+    expect(item).toEqual({ confidence: 1, transcript: '' })
+  })
+})
+
+describe('SpeechRecognitionMock', () => {
   beforeEach(() => {
-    ;(window as IWindow).webkitSpeechRecognition = SpeechRecognitionMock
-    recognition = new SpeechToTextRecognition()
-    recognition.setup()
-    recognition.addEventListener('ended', onEndCallback)
-    recognition.addEventListener('changed', onChangeCallback)
-    recognition.addEventListener('stopped', onStopCallback)
-    speechRecognition = (recognition as any).speechRecognition
+    speechRecognition = new SpeechRecognitionMock()
+
+    speechRecognition.addEventListener('end', onEndSpy)
+    speechRecognition.addEventListener('start', onStartSpy)
+    speechRecognition.addEventListener('result', onResultSpy)
   })
 
   afterEach(() => {
-    delete (window as IWindow).webkitSpeechRecognition
-    onEndCallback.mockReset()
-    onChangeCallback.mockReset()
-    onStopCallback.mockReset()
+    onEndSpy.mockReset()
+    onStartSpy.mockReset()
+    onResultSpy.mockReset()
   })
 
-  it('should be supported', () => {
-    expect(SpeechToTextRecognition.isSupported()).toBeTruthy()
+  it('should start', () => {
+    speechRecognition.start()
+    expect(speechRecognition.started).toBeTruthy()
+    expect(onStartSpy).toBeCalled()
   })
 
-  it('should not be supported', () => {
-    delete (window as IWindow).webkitSpeechRecognition
-    expect(SpeechToTextRecognition.isSupported()).toBeFalsy()
+  it('should dispatch result event', () => {
+    speechRecognition.start()
+    speechRecognition.say('hi are', false)
+
+    expect(onResultSpy).toBeCalled()
+    expect(onResultSpy.mock.calls[0][0].results[0][0].transcript).toEqual(
+      'hi are'
+    )
   })
 
-  it('should set it lang', () => {
-    const langBefore: string = (recognition as any).lang
-    expect(langBefore).toEqual('en')
-    recognition.setLang('it')
-    const langAfter: string = (recognition as any).lang
-    expect(langAfter).toEqual('it')
-  })
+  it('should dispatch end event', () => {
+    speechRecognition.start()
+    speechRecognition.stop()
 
-  it('should call onChange', () => {
-    recognition.listen()
-    speechRecognition.say(oneSentence('hi are'))
-    speechRecognition.say(oneSentence('hi are you'))
-    speechRecognition.say(oneSentence('hi are you doing here', true))
-
-    expect(onChangeCallback).toBeCalledWith({
-      body: 'hi are',
-      type: 'changed'
-    })
-    expect(onChangeCallback).toBeCalledWith({
-      body: 'hi are you',
-      type: 'changed'
-    })
-    expect(onChangeCallback).toBeCalledWith({
-      body: 'hi are you doing here',
-      type: 'changed'
-    })
-  })
-
-  it('should call end ', () => {
-    recognition.listen()
-    speechRecognition.say(oneSentence('hi are'))
-    speechRecognition.say(oneSentence('hi are you'))
-    speechRecognition.say(oneSentence('hi are you doing here', true))
-
-    expect(onEndCallback).toBeCalledWith({
-      body: 'hi are you doing here',
-      type: 'ended'
-    })
-  })
-
-  it('should not call end ', () => {
-    recognition.listen()
-
-    speechRecognition.say(oneSentence('hi are'))
-    speechRecognition.say(oneSentence('hi are you'))
-    expect(onEndCallback).not.toBeCalled()
-  })
-
-  it('should not start a runnig recognition ', () => {
-    const spy = jest.spyOn(speechRecognition, 'start')
-
-    recognition.listen()
-    expect(spy).toBeCalled()
-    recognition.listen()
-    expect(spy.mock.calls.length).toEqual(1)
-  })
-
-  it('should not stop a stopped recognition ', () => {
-    const spy = jest.spyOn(speechRecognition, 'stop')
-
-    recognition.stop()
-    expect(spy).not.toBeCalled()
-  })
-
-  it('should call stop ', () => {
-    recognition.listen()
-    speechRecognition.say(oneSentence('hi are'))
-    speechRecognition.say(oneSentence('hi are you'))
-    recognition.stop()
-    expect(onEndCallback).not.toBeCalled()
-    expect(onStopCallback).toBeCalled()
-  })
-
-  it('should call the callbacks ', () => {
-    const onEndCallback = jest.fn()
-    const onChangeCallback = jest.fn()
-    const onStopCallback = jest.fn()
-    recognition = new SpeechToTextRecognition('he')
-
-    recognition.addEventListener('ended', onEndCallback)
-    recognition.addEventListener('changed', onChangeCallback)
-    recognition.addEventListener('stopped', onStopCallback)
-
-    speechRecognition = (recognition as any).speechRecognition
-    expect((recognition as any).lang).toEqual('he')
-    recognition.listen()
-    speechRecognition.say(oneSentence('hi are'))
-    speechRecognition.say(oneSentence('hi are you'))
-    speechRecognition.say(oneSentence('hi are you doing here', true))
-
-    expect(onEndCallback).toBeCalledWith({
-      body: 'hi are you doing here',
-      type: 'ended'
-    })
-
-    expect(onChangeCallback).toBeCalledWith({
-      body: 'hi are',
-      type: 'changed'
-    })
-    expect(onChangeCallback).toBeCalledWith({
-      body: 'hi are you',
-      type: 'changed'
-    })
-    expect(onChangeCallback).toBeCalledWith({
-      body: 'hi are you doing here',
-      type: 'changed'
-    })
-
-    recognition.listen()
-    recognition.stop()
-
-    expect(onStopCallback).toBeCalled()
-  })
-
-  it('should remove event listener', () => {
-    recognition.removeEventListener('ended', onEndCallback)
-    recognition.removeEventListener('changed', onChangeCallback)
-    recognition.removeEventListener('stopped', onStopCallback)
-
-    recognition.listen()
-    speechRecognition.say(oneSentence('hi are you doing here', true))
-
-    expect(onEndCallback).not.toBeCalled()
-    expect(onChangeCallback).not.toBeCalled()
-
-    recognition.listen()
-    recognition.stop()
-
-    expect(onStopCallback).not.toBeCalled()
-  })
-
-  it('should dispach an event', () => {
-    recognition.dispatchEvent({ type: 'stopped' })
-    expect(onStopCallback).toBeCalled()
+    expect(speechRecognition.started).toBeFalsy()
+    expect(onEndSpy).toBeCalled()
   })
 
   it('should not throw an error', () => {
-    recognition.removeEventListener('test', () => {
-      return
-    })
-    ;(recognition as any).dispatchEvent({ type: 'wow' })
+    ;(speechRecognition as EventTarget).removeEventListener('test', onCustomSpy)
+  })
+
+  it('should remove listener', () => {
+    ;(speechRecognition as EventTarget).removeEventListener('start', onStartSpy)
+    speechRecognition.start()
+    expect(onStartSpy).not.toBeCalled()
+  })
+
+  it('should not remove listener', () => {
+    ;(speechRecognition as EventTarget).removeEventListener(
+      'start',
+      function() {
+        return
+      }
+    )
+    speechRecognition.start()
+    expect(onStartSpy).toBeCalled()
+  })
+
+  it('should a not start a started recognition', () => {
+    speechRecognition.start()
+    expect(() => speechRecognition.start()).toThrow()
+  })
+  it('should do nothing when stopping a stppoed recognition', () => {
+    speechRecognition.stop()
+  })
+
+  it('should not dispach event the not exist on the listeners', () => {
+    const event = document.createEvent('CustomEvent')
+    event.initCustomEvent('wow', false, false, null)
+    speechRecognition.dispatchEvent(event)
   })
 })

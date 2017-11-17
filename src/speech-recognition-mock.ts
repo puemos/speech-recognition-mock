@@ -1,3 +1,5 @@
+import { oneSentence } from './utils'
+
 export interface SpeechRecognitionEventMap {
   audiostart: Event
   soundstart: Event
@@ -19,18 +21,17 @@ export interface SpeechRecognitionStaticMock {
   prototype: SpeechRecognitionMock
   new (): SpeechRecognitionMock
 }
-export class SpeechRecognitionMock implements SpeechRecognition {
+
+export interface ISpeechRecognitionMock extends SpeechRecognition {
+  say(sentence: string, isFinal: boolean, resultIndex: number): void
+}
+export class SpeechRecognitionMock implements ISpeechRecognitionMock {
   public grammars: SpeechGrammarList
   public lang: string
   public continuous: boolean
   public interimResults: boolean
   public maxAlternatives: number
   public serviceURI: string
-  private listeners: {
-    [K in keyof SpeechRecognitionEventMap]: Array<
-      (ev: SpeechRecognitionEventMap[K]) => any
-    >
-  }
 
   public onaudiostart: (ev: Event) => any
   public onsoundstart: (ev: Event) => any
@@ -44,34 +45,42 @@ export class SpeechRecognitionMock implements SpeechRecognition {
   public onend: (ev: Event) => any
 
   public started: boolean
+
+  private listeners: {
+    [key: string]: ((ev: Event) => any)[]
+  }
+
   constructor() {
-    this.listeners = {
-      audiostart: [],
-      soundstart: [],
-      speechstart: [],
-      speechend: [],
-      soundend: [],
-      result: [],
-      nomatch: [],
-      error: [],
-      start: [],
-      end: []
-    }
+    this.listeners = {}
+
+    this.addEventListener('audiostart', this.onaudiostart)
+    this.addEventListener('soundstart', this.onsoundstart)
+    this.addEventListener('speechstart', this.onspeechstart)
+    this.addEventListener('speechend', this.onspeechend)
+    this.addEventListener('soundend', this.onsoundend)
+    this.addEventListener('result', this.onresult)
+    this.addEventListener('nomatch', this.onnomatch)
+    this.addEventListener('error', this.onerror)
+    this.addEventListener('start', this.onstart)
+    this.addEventListener('end', this.onend)
   }
   addEventListener<K extends keyof SpeechRecognitionEventMap>(
     type: K,
-    listener?: (ev: SpeechRecognitionEventMap[K]) => any,
+    listener: (ev: SpeechRecognitionEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions
   ): void {
+    this.listeners[type] = this.listeners[type] || []
     this.listeners[type].push(listener)
   }
   dispatchEvent(ev: Event): boolean {
     if (!(ev.type in this.listeners)) {
       return true
     }
-    this.listeners[ev.type].forEach(callback => {
-      callback.call(this, ev)
-    })
+    this.listeners[ev.type]
+      .filter(callback => typeof callback === 'function')
+      .forEach(callback => {
+        callback.call(this, ev)
+      })
     return true
   }
   removeEventListener<K extends keyof SpeechRecognitionEventMap>(
@@ -96,7 +105,8 @@ export class SpeechRecognitionMock implements SpeechRecognition {
     this.started = true
     // Create and dispatch an event
     const event = document.createEvent('CustomEvent')
-    this.onstart(event)
+    event.initCustomEvent('start', false, false, null)
+    this.dispatchEvent(event)
   }
   stop(): void {
     this.abort()
@@ -109,10 +119,11 @@ export class SpeechRecognitionMock implements SpeechRecognition {
     // Create and dispatch an event
     const event = document.createEvent('CustomEvent')
     event.initCustomEvent('end', false, false, null)
-
-    this.onend(event)
+    this.dispatchEvent(event)
   }
-  say(results: SpeechRecognitionResultList, resultIndex: number = 0) {
+
+  say(sentence: string, isFinal: boolean, resultIndex: number = 0): void {
+    const results = oneSentence(sentence, isFinal)
     // Create the event
     const event = document.createEvent(
       'CustomEvent'
@@ -121,7 +132,7 @@ export class SpeechRecognitionMock implements SpeechRecognition {
     event.resultIndex = resultIndex
     event.results = results
     event.interpretation = null
-    event.emma = null
-    this.onresult(event)
+    delete event.emma
+    this.dispatchEvent(event)
   }
 }
