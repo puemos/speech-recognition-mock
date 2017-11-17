@@ -31,8 +31,9 @@
         "lint": "tslint -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
         "prebuild": "rimraf dist",
         "build":
-            "tsc && webpack && webpack --env.prod && rimraf compiled && typedoc --out dist/docs --target es6 --theme minimal src",
+            "tsc && webpack && webpack --env.prod && rimraf compiled",
         "start": "tsc -w & webpack -w",
+        "gen-docs": "typedoc --out dist/docs --target es6 --theme minimal src",
         "test": "jest",
         "test:watch": "jest --watch",
         "test:prod": "npm run lint && npm run test -- --coverage --no-cache",
