@@ -15,9 +15,7 @@
     "main": "dist/speech-recognition-mock.umd.js",
     "module": "dist/speech-recognition-mock.es5.js",
     "typings": "dist/types/speech-recognition-mock.d.ts",
-    "files": [
-        "dist"
-    ],
+    "files": ["dist"],
     "author": "Shy <puemos@gmail.com>",
     "repository": {
         "type": "git",
@@ -32,7 +30,8 @@
         "prepush": "npm run test:prod && npm run build",
         "lint": "tslint -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
         "prebuild": "rimraf dist",
-        "build": "tsc && webpack && webpack --env.prod && rimraf compiled && typedoc --out dist/docs --target es6 --theme minimal src",
+        "build":
+            "tsc && webpack && webpack --env.prod && rimraf compiled && typedoc --out dist/docs --target es6 --theme minimal src",
         "start": "tsc -w & webpack -w",
         "test": "jest",
         "test:watch": "jest --watch",
@@ -41,28 +40,16 @@
         "report-coverage": "cat ./coverage/lcov.info | coveralls"
     },
     "lint-staged": {
-        "{src,test}/**/*.ts": [
-            "prettier --write --no-semi --single-quote",
-            "git add"
-        ]
+        "{src,test}/**/*.ts": ["prettier --write --no-semi --single-quote", "git add"]
     },
     "jest": {
-        "setupFiles": [
-            "./test/setup/setup.js"
-        ],
+        "setupFiles": ["./test/setup/setup.js"],
         "transform": {
             ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
         },
         "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-        "moduleFileExtensions": [
-            "ts",
-            "tsx",
-            "js"
-        ],
-        "coveragePathIgnorePatterns": [
-            "/node_modules/",
-            "/test/"
-        ],
+        "moduleFileExtensions": ["ts", "tsx", "js"],
+        "coveragePathIgnorePatterns": ["/node_modules/", "/test/"],
         "coverageThreshold": {
             "global": {
                 "branches": 90,
