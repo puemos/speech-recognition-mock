@@ -125,7 +125,7 @@ export class SpeechRecognitionMock implements ISpeechRecognitionMock {
       'CustomEvent'
     ) as SpeechRecognitionEventMock
     event.initCustomEvent('result', false, false, {})
-    event.resultIndex = results.length
+    event.resultIndex = results.length - 1
     event.results = results
     event.interpretation = null
     delete event.emma
