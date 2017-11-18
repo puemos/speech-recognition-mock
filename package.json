@@ -12,8 +12,8 @@
         "speech-recognition",
         "speechRecognition"
     ],
-    "main": "dist/speech-recognition-mock.umd.js",
-    "module": "dist/speech-recognition-mock.es5.js",
+    "main": "dist/speech-recognition-mock.js",
+    "module": "dist/speech-recognition-mock.js",
     "typings": "dist/types/speech-recognition-mock.d.ts",
     "files": ["dist"],
     "author": "Shy <puemos@gmail.com>",
