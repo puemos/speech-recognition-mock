@@ -25,6 +25,7 @@ export interface SpeechRecognitionStaticMock {
 export interface ISpeechRecognitionMock extends SpeechRecognition {
   say(sentence: string, isFinal: boolean, resultIndex: number): void
 }
+
 export class SpeechRecognitionMock implements ISpeechRecognitionMock {
   public grammars: SpeechGrammarList
   public lang: string
@@ -52,17 +53,6 @@ export class SpeechRecognitionMock implements ISpeechRecognitionMock {
 
   constructor() {
     this.listeners = {}
-
-    this.addEventListener('audiostart', this.onaudiostart)
-    this.addEventListener('soundstart', this.onsoundstart)
-    this.addEventListener('speechstart', this.onspeechstart)
-    this.addEventListener('speechend', this.onspeechend)
-    this.addEventListener('soundend', this.onsoundend)
-    this.addEventListener('result', this.onresult)
-    this.addEventListener('nomatch', this.onnomatch)
-    this.addEventListener('error', this.onerror)
-    this.addEventListener('start', this.onstart)
-    this.addEventListener('end', this.onend)
   }
   addEventListener<K extends keyof SpeechRecognitionEventMap>(
     type: K,
@@ -106,6 +96,9 @@ export class SpeechRecognitionMock implements ISpeechRecognitionMock {
     // Create and dispatch an event
     const event = document.createEvent('CustomEvent')
     event.initCustomEvent('start', false, false, null)
+    if (this.onstart) {
+      this.onstart(event)
+    }
     this.dispatchEvent(event)
   }
   stop(): void {
@@ -119,20 +112,26 @@ export class SpeechRecognitionMock implements ISpeechRecognitionMock {
     // Create and dispatch an event
     const event = document.createEvent('CustomEvent')
     event.initCustomEvent('end', false, false, null)
+    if (this.onend) {
+      this.onend(event)
+    }
     this.dispatchEvent(event)
   }
 
-  say(sentence: string, isFinal: boolean, resultIndex: number = 0): void {
+  say(sentence: string, isFinal: boolean): void {
     const results = oneSentence(sentence, isFinal)
     // Create the event
     const event = document.createEvent(
       'CustomEvent'
     ) as SpeechRecognitionEventMock
     event.initCustomEvent('result', false, false, {})
-    event.resultIndex = resultIndex
+    event.resultIndex = results.length
     event.results = results
     event.interpretation = null
     delete event.emma
+    if (this.onresult) {
+      this.onresult(event)
+    }
     this.dispatchEvent(event)
   }
 }

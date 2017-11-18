@@ -52,6 +52,35 @@ describe('SpeechRecognitionMock', () => {
     onResultSpy.mockReset()
   })
 
+  it('should add start listener', () => {
+    const onStartSpy2 = jest.fn()
+    speechRecognition.onstart = onStartSpy2
+    speechRecognition.start()
+    expect(speechRecognition.started).toBeTruthy()
+    expect(onStartSpy2).toBeCalled()
+  })
+
+  it('should add result listener', () => {
+    const onResultSpy2 = jest.fn()
+    speechRecognition.onresult = onResultSpy2
+    speechRecognition.start()
+    speechRecognition.say('hi are', false)
+
+    expect(onResultSpy2).toBeCalled()
+    expect(onResultSpy2.mock.calls[0][0].results[0][0].transcript).toEqual(
+      'hi are'
+    )
+  })
+
+  it('should add end listener', () => {
+    const onEndSpy2 = jest.fn()
+    speechRecognition.onend = onEndSpy2
+    speechRecognition.start()
+    speechRecognition.stop()
+
+    expect(onEndSpy2).toBeCalled()
+  })
+
   it('should start', () => {
     speechRecognition.start()
     expect(speechRecognition.started).toBeTruthy()

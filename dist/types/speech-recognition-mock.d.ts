@@ -46,5 +46,5 @@ export declare class SpeechRecognitionMock implements ISpeechRecognitionMock {
     start(): void;
     stop(): void;
     abort(): void;
-    say(sentence: string, isFinal: boolean, resultIndex?: number): void;
+    say(sentence: string, isFinal: boolean): void;
 }

@@ -123,17 +123,18 @@ var oneSentence = function (sentence, isFinal) {
 
 var speech_recognition_mock_SpeechRecognitionMock = /** @class */ (function () {
     function SpeechRecognitionMock() {
+        var _this = this;
         this.listeners = {};
-        this.addEventListener('audiostart', this.onaudiostart);
-        this.addEventListener('soundstart', this.onsoundstart);
-        this.addEventListener('speechstart', this.onspeechstart);
-        this.addEventListener('speechend', this.onspeechend);
-        this.addEventListener('soundend', this.onsoundend);
-        this.addEventListener('result', this.onresult);
-        this.addEventListener('nomatch', this.onnomatch);
-        this.addEventListener('error', this.onerror);
-        this.addEventListener('start', this.onstart);
-        this.addEventListener('end', this.onend);
+        this.addEventListener("audiostart", function (ev) { return _this.onaudiostart(ev); });
+        this.addEventListener("soundstart", function (ev) { return _this.onsoundstart(ev); });
+        this.addEventListener("speechstart", function (ev) { return _this.onspeechstart(ev); });
+        this.addEventListener("speechend", function (ev) { return _this.onspeechend(ev); });
+        this.addEventListener("soundend", function (ev) { return _this.onsoundend(ev); });
+        this.addEventListener("result", function (ev) { return _this.onresult(ev); });
+        this.addEventListener("nomatch", function (ev) { return _this.onnomatch(ev); });
+        this.addEventListener("error", function (ev) { return _this.onerror(ev); });
+        this.addEventListener("start", function (ev) { return _this.onstart(ev); });
+        this.addEventListener("end", function (ev) { return _this.onend(ev); });
     }
     SpeechRecognitionMock.prototype.addEventListener = function (type, listener, options) {
         this.listeners[type] = this.listeners[type] || [];
@@ -145,7 +146,7 @@ var speech_recognition_mock_SpeechRecognitionMock = /** @class */ (function () {
             return true;
         }
         this.listeners[ev.type]
-            .filter(function (callback) { return typeof callback === 'function'; })
+            .filter(function (callback) { return typeof callback === "function"; })
             .forEach(function (callback) {
             callback.call(_this, ev);
         });
@@ -163,8 +164,8 @@ var speech_recognition_mock_SpeechRecognitionMock = /** @class */ (function () {
         }
         this.started = true;
         // Create and dispatch an event
-        var event = document.createEvent('CustomEvent');
-        event.initCustomEvent('start', false, false, null);
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent("start", false, false, null);
         this.dispatchEvent(event);
     };
     SpeechRecognitionMock.prototype.stop = function () {
@@ -176,16 +177,16 @@ var speech_recognition_mock_SpeechRecognitionMock = /** @class */ (function () {
         }
         this.started = false;
         // Create and dispatch an event
-        var event = document.createEvent('CustomEvent');
-        event.initCustomEvent('end', false, false, null);
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent("end", false, false, null);
         this.dispatchEvent(event);
     };
     SpeechRecognitionMock.prototype.say = function (sentence, isFinal, resultIndex) {
         if (resultIndex === void 0) { resultIndex = 0; }
         var results = oneSentence(sentence, isFinal);
         // Create the event
-        var event = document.createEvent('CustomEvent');
-        event.initCustomEvent('result', false, false, {});
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent("result", false, false, {});
         event.resultIndex = resultIndex;
         event.results = results;
         event.interpretation = null;
