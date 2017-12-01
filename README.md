@@ -6,6 +6,10 @@
 [![Coveralls](https://img.shields.io/coveralls/puemos/speech-recognition-mock.svg)](https://coveralls.io/github/puemos/speech-recognition-mock)
 [![Dev Dependencies](https://david-dm.org/puemos/speech-recognition-mock/dev-status.svg)](https://david-dm.org/puemos/speech-recognition-mock)
 
+### Docs
+
+https://puemos.github.io/speech-recognition-mock
+
 
 ### Usage
 
@@ -17,6 +21,5 @@ window.SpeechRecognition = SpeechRecognition
 
 ```
 
-### Features
 
 
