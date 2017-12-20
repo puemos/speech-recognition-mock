@@ -76,7 +76,7 @@
         "mapCoverage": true
     },
     "devDependencies": {
-        "@types/jest": "21.1.8",
+        "@types/jest": "21.1.9",
         "@types/node": "8.5.1",
         "@types/webspeechapi": "0.0.28",
         "coveralls": "3.0.0",
