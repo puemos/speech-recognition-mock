@@ -77,7 +77,7 @@
     },
     "devDependencies": {
         "@types/jest": "21.1.9",
-        "@types/node": "8.5.1",
+        "@types/node": "8.5.2",
         "@types/webspeechapi": "0.0.28",
         "coveralls": "3.0.0",
         "cross-env": "5.1.1",
