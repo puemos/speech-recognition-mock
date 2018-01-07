@@ -1,6 +1,6 @@
 {
     "name": "speech-recognition-mock",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Mock SpeechRecognition for headless unit tests",
     "keywords": [
         "mock",
