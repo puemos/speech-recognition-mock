@@ -13,9 +13,7 @@ export interface SpeechRecognitionEventMap {
   end: Event
 }
 
-export interface SpeechRecognitionEventMock
-  extends SpeechRecognitionEvent,
-    CustomEvent {}
+export interface SpeechRecognitionEventMock extends SpeechRecognitionEvent, CustomEvent {}
 
 export interface SpeechRecognitionStaticMock {
   prototype: SpeechRecognitionMock
@@ -34,6 +32,7 @@ export class SpeechRecognitionMock implements ISpeechRecognitionMock {
   public maxAlternatives: number
   public serviceURI: string
 
+  public onaudioend: (ev: Event) => any
   public onaudiostart: (ev: Event) => any
   public onsoundstart: (ev: Event) => any
   public onspeechstart: (ev: Event) => any
@@ -66,11 +65,9 @@ export class SpeechRecognitionMock implements ISpeechRecognitionMock {
     if (!(ev.type in this.listeners)) {
       return true
     }
-    this.listeners[ev.type]
-      .filter(callback => typeof callback === 'function')
-      .forEach(callback => {
-        callback.call(this, ev)
-      })
+    this.listeners[ev.type].filter(callback => typeof callback === 'function').forEach(callback => {
+      callback.call(this, ev)
+    })
     return true
   }
   removeEventListener<K extends keyof SpeechRecognitionEventMap>(
@@ -81,9 +78,7 @@ export class SpeechRecognitionMock implements ISpeechRecognitionMock {
     if (!(type in this.listeners)) {
       return
     }
-    this.listeners[type] = this.listeners[type].filter(
-      callback => callback !== listener
-    )
+    this.listeners[type] = this.listeners[type].filter(callback => callback !== listener)
   }
 
   start(): void {
@@ -121,9 +116,7 @@ export class SpeechRecognitionMock implements ISpeechRecognitionMock {
   say(sentence: string, isFinal: boolean): void {
     const results = oneSentence(sentence, isFinal)
     // Create the event
-    const event = document.createEvent(
-      'CustomEvent'
-    ) as SpeechRecognitionEventMock
+    const event = document.createEvent('CustomEvent') as SpeechRecognitionEventMock
     event.initCustomEvent('result', false, false, {})
     event.resultIndex = results.length - 1
     event.results = results
